@@ -3,7 +3,7 @@ import { BooksModule } from './books/books.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 @Module({
-  imports: [BooksModule, PrismaModule, AuthModule],
+  imports: [PrismaModule, BooksModule, AuthModule],
   controllers: [],
   providers: [],
 })
