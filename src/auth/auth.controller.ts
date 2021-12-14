@@ -1,4 +1,22 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { SignUpDto } from './dto/sign-up.dto';
+import * as bcrypt from 'bcrypt';
+import { SignInDto } from './dto/sign-in.dto';
 
 @Controller('auth')
-export class AuthController {}
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('/signin')
+  async signIn(@Body() signInDto: SignInDto) {
+    return this.authService.signIn(signInDto);
+  }
+
+  @Post('/signup')
+  async signUp(@Body() signUpDto: SignUpDto) {
+    const salt = await bcrypt.genSalt();
+    signUpDto.password = await bcrypt.hash(signUpDto.password, salt);
+    return this.authService.signUp(signUpDto);
+  }
+}
