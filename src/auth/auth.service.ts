@@ -4,32 +4,37 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SignInDto } from './dto/sign-in.dto';
-import { SignUpDto } from './dto/sign-up.dto';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { UsersService } from 'src/users/users.service';
+import { AuthCredentialDto } from './dto/auth-credential.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userService: UsersService,
+    private jwtService: JwtService,
+  ) {}
 
-  async signIn(signInDto: SignInDto) {
-    const { email, password } = signInDto;
-    const user = await this.prisma.user.findUnique({
-      where: { email: email },
-    });
+  async signIn(authCredentialDto: AuthCredentialDto) {
+    const { email, password } = authCredentialDto;
+    const user = await this.userService.findUser(email);
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      return 'token';
+      const payload = { email };
+      const accessToken = await this.jwtService.sign(payload);
+      return { accessToken };
     } else {
       throw new UnauthorizedException('Incorrect Credentials');
     }
   }
 
-  async signUp(signUpDto: SignUpDto) {
-    const { email } = signUpDto;
+  async signUp(authCredentialDto: AuthCredentialDto) {
+    const { email } = authCredentialDto;
     if (await this.prisma.user.count({ where: { email: email } })) {
       throw new ConflictException('email already taken');
     }
-    return this.prisma.user.create({ data: signUpDto });
+    return this.prisma.user.create({ data: authCredentialDto });
   }
 }

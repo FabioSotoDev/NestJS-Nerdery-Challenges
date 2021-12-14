@@ -1,22 +1,24 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto/sign-up.dto';
 import * as bcrypt from 'bcrypt';
-import { SignInDto } from './dto/sign-in.dto';
+import { AuthCredentialDto } from './dto/auth-credential.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/signin')
-  async signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto);
+  async signIn(@Body() authCredentialDto: AuthCredentialDto) {
+    return this.authService.signIn(authCredentialDto);
   }
 
   @Post('/signup')
-  async signUp(@Body() signUpDto: SignUpDto) {
+  async signUp(@Body() authCredentialDto: AuthCredentialDto) {
     const salt = await bcrypt.genSalt();
-    signUpDto.password = await bcrypt.hash(signUpDto.password, salt);
-    return this.authService.signUp(signUpDto);
+    authCredentialDto.password = await bcrypt.hash(
+      authCredentialDto.password,
+      salt,
+    );
+    return this.authService.signUp(authCredentialDto);
   }
 }
