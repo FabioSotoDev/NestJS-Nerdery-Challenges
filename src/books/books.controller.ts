@@ -1,6 +1,18 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from '@prisma/client';
+import { GetUser } from 'src/users/get-user.decorator';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('books')
 export class BooksController {
@@ -11,13 +23,24 @@ export class BooksController {
     return this.booksService.getBooks();
   }
 
+  @Post()
+  @UseGuards(AuthGuard())
+  createBook(@Body() createBookDto: CreateBookDto, @GetUser() user: User) {
+    return this.booksService.createBook(createBookDto, user);
+  }
+
   @Get('/:id')
   getBookById(@Param('id') id: string) {
     return this.booksService.getBookById(id);
   }
 
-  @Post()
-  createBook(@Body() createBookDto: CreateBookDto) {
-    return this.booksService.createBook(createBookDto);
+  @Patch('/:id')
+  @UseGuards(AuthGuard())
+  updateBook(
+    @Param('id') id: string,
+    @Body() updateBookDto: UpdateBookDto,
+    @GetUser() user: User,
+  ) {
+    return this.booksService.updateBook(id, updateBookDto, user);
   }
 }

@@ -15,4 +15,12 @@ export class UsersService {
       throw new UnauthorizedException('Incorrect Credentials');
     }
   }
+
+  async makeManager(email: string) {
+    const user = await this.prisma.user.update({
+      where: { email: email },
+      data: { userType: { set: 'MANAGER' } },
+    });
+    return user;
+  }
 }
