@@ -43,4 +43,10 @@ export class BooksController {
   ) {
     return this.booksService.updateBook(id, updateBookDto, user);
   }
+
+  @Post('/:id/like')
+  @UseGuards(AuthGuard())
+  likeBook(@Param('id') id: string, @GetUser() user: User) {
+    return this.booksService.likeBook(id, user);
+  }
 }
